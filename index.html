@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>Vet Spaced Repetition Planner</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 40px 20px; 
+            background-color: #f0f4f8; 
+            display: flex; 
+            justify-content: center; 
+        }
+        .card { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+            max-width: 520px; 
+            width: 100%; 
+            text-align: center; 
+        }
+        h2 { color: #1e293b; margin-top: 0; }
+        p { color: #64748b; font-size: 15px; margin-bottom: 25px; line-height: 1.5; }
+        
+        .topic-badge {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .red { background-color: #fef2f2; color: #991b1b; border-color: #fecaca; }
+        .red:hover { background-color: #fee2e2; }
+
+        .orange { background-color: #fff7ed; color: #c2410c; border-color: #ffedd5; }
+        .orange:hover { background-color: #ffedd5; }
+
+        .yellow { background-color: #fefce8; color: #a16207; border-color: #fef08a; }
+        .yellow:hover { background-color: #fef08a; }
+
+        .green-light { background-color: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+        .green-light:hover { background-color: #dcfce7; }
+
+        .green-dark { background-color: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+        .green-dark:hover { background-color: #d1fae5; }
+
+        .result { 
+            margin-top: 25px; 
+            padding: 20px; 
+            background: #f8fafc; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 12px; 
+            display: none; 
+            text-align: left;
+        }
+        
+        button.cal-btn { 
+            background-color: #2563eb; 
+            color: white; 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            font-weight: bold;
+            width: 100%;
+            margin-top: 15px; 
+            transition: background 0.2s;
+            text-align: center;
+        }
+        button.cal-btn:hover { background-color: #1d4ed8; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>🐾 Πώς πήγε το Κουίζ;</h2>
+    
+    <!-- Εδώ θα εμφανίζεται αυτόματα το μάθημα -->
+    <div id="topicBadge" class="topic-badge" style="display:none;">Μάθημα: <span id="topicName"></span></div>
+
+    <p>Επίλεξε παρακάτω με βάση την αυτοπεποίθησή σου στο θέμα και το ποσοστό των απαντήσεων που εκτιμάς ότι απάντησες σωστά, για να υπολογίσουμε πότε θα κάνεις την επόμενη επανάληψη.</p>
+    
+    <button class="option-btn red" onclick="calculate('🔴 < 50% σωστά (Δυσκολεύτηκα πολύ)', 1)">
+        🔴 &lt; 50% σωστά — Δυσκολεύτηκα πολύ / Χαμηλή σιγουριά
+    </button>
+
+    <button class="option-btn orange" onclick="calculate('🟠 50%-70% σωστά (Χρειάζομαι εξάσκηση)', 3)">
+        🟠 50% - 70% σωστά — Χρειάζομαι εξάσκηση / Μέτρια σιγουριά
+    </button>
+
+    <button class="option-btn yellow" onclick="calculate('🟡 70%-89% σωστά (Το κατέχω καλά)', 5)">
+        🟡 70% - 89% σωστά — Το κατέχω καλά, με μερικά λάθη
+    </button>
+
+    <button class="option-btn green-light" onclick="calculate('🟢 90%-95% σωστά (Το ξέρω καλά)', 7)">
+        🟢 90% - 95% σωστά — Το ξέρω καλά / Υψηλή σιγουριά
+    </button>
+
+    <button class="option-btn green-dark" onclick="calculate('🟢 95%-100% σωστά (Το ξέρω τέλεια)', 14)">
+        🟢 95% - 100% σωστά — Το ξέρω τέλεια / Απόλυτη σιγουριά
+    </button>
+
+    <div id="output" class="result">
+        <div id="resultText"></div>
+        <a id="calLink" href="#" target="_blank" style="text-decoration: none;">
+            <button class="cal-btn">📅 Προσθήκη στο Google Calendar</button>
+        </a>
+    </div>
+</div>
+
+<script>
+// 1. Διαβάζουμε αυτόματα αν υπάρχει όνομα μαθήματος στη διεύθυνση (URL)
+const urlParams = new URLSearchParams(window.location.search);
+let currentTopic = urlParams.get('topic'); // Ψάχνει για ?topic=ΟνομαΜαθήματος
+
+if (currentTopic) {
+    // Αν βρει μάθημα, το εμφανίζει στην οθόνη
+    document.getElementById('topicName').innerText = currentTopic;
+    document.getElementById('topicBadge').style.display = 'inline-block';
+} else {
+    currentTopic = "Κτηνιατρικό Κουίζ"; // Προεπιλεγμένο αν δεν δοθεί τίποτα
+}
+
+function calculate(label, days) {
+    let today = new Date();
+    let nextDate = new Date();
+    nextDate.setDate(today.getDate() + days);
+
+    let formattedDate = nextDate.toISOString().replace(/-|:|\.\d\d\d/g, "").substring(0, 8);
+    
+    // Χρησιμοποιούμε το δυναμικό θέμα που διαβάσαμε από το link
+    let calendarTitle = `Επανάληψη: ${currentTopic}`;
+
+    let calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(calendarTitle)}&details=Επανάληψη+βάσει+αυτοπεποίθησης+(${encodeURIComponent(label)})&dates=${formattedDate}/${formattedDate}`;
+
+    document.getElementById('resultText').innerHTML = `
+        <strong style="color: #1e293b;">Κατηγορία: ${label}</strong><br><br>
+        <span style="color: #475569; font-size: 14px;">
+            Η επανάληψη για το μάθημα <strong>${currentTopic}</strong> προγραμματίστηκε για τις <strong>${nextDate.toLocaleDateString('el-GR')}</strong> (σε ${days} ημέρες).
+        </span>
+    `;
+    
+    document.getElementById('calLink').href = calUrl;
+    document.getElementById('output').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
