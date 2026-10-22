@@ -2,73 +2,86 @@
 <html lang="el">
 <head>
     <meta charset="UTF-8">
+    <!-- Ρύθμιση για σωστή εμφάνιση σε κινητά (Responsive) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vet Spaced Repetition Planner</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body { 
-            font-family: Arial, sans-serif; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             margin: 0; 
-            padding: 40px 20px; 
+            padding: 20px 15px; 
             background-color: #f0f4f8; 
             display: flex; 
             justify-content: center; 
+            align-items: center;
+            min-height: 100vh;
         }
         .card { 
             background: white; 
-            padding: 30px; 
-            border-radius: 16px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
-            max-width: 520px; 
+            padding: 24px 20px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08); 
+            max-width: 480px; 
             width: 100%; 
             text-align: center; 
         }
-        h2 { color: #1e293b; margin-top: 0; }
-        p { color: #64748b; font-size: 15px; margin-bottom: 25px; line-height: 1.5; }
+        h2 { 
+            color: #1e293b; 
+            margin-top: 0; 
+            font-size: 22px;
+            line-height: 1.3;
+        }
+        p.intro { 
+            color: #64748b; 
+            font-size: 15px; 
+            margin-bottom: 20px; 
+            line-height: 1.5; 
+        }
         
         .topic-badge {
             background-color: #e0f2fe;
             color: #0369a1;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-weight: bold;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-weight: 700;
             display: inline-block;
-            margin-bottom: 20px;
-            font-size: 14px;
+            margin-bottom: 18px;
+            font-size: 16px;
+            word-break: break-word;
         }
 
         .option-btn {
             width: 100%;
-            padding: 14px 18px;
+            padding: 16px 14px;
             margin-bottom: 12px;
             border: 2px solid transparent;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: bold;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
             text-align: left;
-            transition: all 0.2s ease;
+            transition: transform 0.1s ease, background-color 0.2s ease;
+            line-height: 1.4;
+        }
+        .option-btn:active {
+            transform: scale(0.98);
         }
 
         .red { background-color: #fef2f2; color: #991b1b; border-color: #fecaca; }
-        .red:hover { background-color: #fee2e2; }
-
         .orange { background-color: #fff7ed; color: #c2410c; border-color: #ffedd5; }
-        .orange:hover { background-color: #ffedd5; }
-
         .yellow { background-color: #fefce8; color: #a16207; border-color: #fef08a; }
-        .yellow:hover { background-color: #fef08a; }
-
         .green-light { background-color: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
-        .green-light:hover { background-color: #dcfce7; }
-
         .green-dark { background-color: #ecfdf5; color: #047857; border-color: #a7f3d0; }
-        .green-dark:hover { background-color: #d1fae5; }
 
         .result { 
             margin-top: 25px; 
             padding: 20px; 
             background: #f8fafc; 
             border: 2px solid #e2e8f0; 
-            border-radius: 12px; 
+            border-radius: 16px; 
             display: none; 
             text-align: left;
         }
@@ -77,17 +90,18 @@
             background-color: #2563eb; 
             color: white; 
             border: none; 
-            padding: 12px 20px; 
-            border-radius: 8px; 
+            padding: 16px 20px; 
+            border-radius: 12px; 
             cursor: pointer; 
-            font-size: 15px; 
+            font-size: 16px; 
             font-weight: bold;
             width: 100%;
             margin-top: 15px; 
-            transition: background 0.2s;
-            text-align: center;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
         }
-        button.cal-btn:hover { background-color: #1d4ed8; }
+        button.cal-btn:active {
+            background-color: #1d4ed8;
+        }
     </style>
 </head>
 <body>
@@ -95,28 +109,28 @@
 <div class="card">
     <h2>🐾 Πώς πήγε το Κουίζ;</h2>
     
-    <div id="topicBadge" class="topic-badge" style="display:none;">Μάθημα: <span id="topicName"></span></div>
+    <div id="topicBadge" class="topic-badge" style="display:none;">📖 <span id="topicName"></span></div>
 
-    <p>Επίλεξε παρακάτω με βάση την αυτοπεποίθησή σου στο θέμα και το ποσοστό των απαντήσεων που εκτιμάς ότι απάντησες σωστά, για να υπολογίσουμε πότε θα κάνεις την επόμενη επανάληψη.</p>
+    <p class="intro">Επίλεξε το ποσοστό επιτυχίας / αυτοπεποίθησης για να υπολογίσουμε την ημερομηνία επανάληψης.</p>
     
-    <button class="option-btn red" onclick="calculate('🔴 < 50% σωστά (Δυσκολεύτηκα πολύ)', 1)">
-        🔴 &lt; 50% σωστά — Δυσκολεύτηκα πολύ / Χαμηλή σιγουριά
+    <button class="option-btn red" onclick="calculate('🔴 < 50% σωστά', 1)">
+        🔴 &lt; 50% σωστά — Χαμηλή σιγουριά (+1 ημέρα)
     </button>
 
-    <button class="option-btn orange" onclick="calculate('🟠 50%-70% σωστά (Χρειάζομαι εξάσκηση)', 3)">
-        🟠 50% - 70% σωστά — Χρειάζομαι εξάσκηση / Μέτρια σιγουριά
+    <button class="option-btn orange" onclick="calculate('🟠 50%-70% σωστά', 3)">
+        🟠 50% - 70% σωστά — Μέτρια σιγουριά (+3 ημέρες)
     </button>
 
-    <button class="option-btn yellow" onclick="calculate('🟡 70%-89% σωστά (Το κατέχω καλά)', 5)">
-        🟡 70% - 89% σωστά — Το κατέχω καλά, με μερικά λάθη
+    <button class="option-btn yellow" onclick="calculate('🟡 70%-89% σωστά', 5)">
+        🟡 70% - 89% σωστά — Καλή σιγουριά (+5 ημέρες)
     </button>
 
-    <button class="option-btn green-light" onclick="calculate('🟢 90%-95% σωστά (Το ξέρω καλά)', 7)">
-        🟢 90% - 95% σωστά — Το ξέρω καλά / Υψηλή σιγουριά
+    <button class="option-btn green-light" onclick="calculate('🟢 90%-95% σωστά', 7)">
+        🟢 90% - 95% σωστά — Υψηλή σιγουριά (+7 ημέρες)
     </button>
 
-    <button class="option-btn green-dark" onclick="calculate('🟢 95%-100% σωστά (Το ξέρω τέλεια)', 14)">
-        🟢 95% - 100% σωστά — Το ξέρω τέλεια / Απόλυτη σιγουριά
+    <button class="option-btn green-dark" onclick="calculate('🟢 95%-100% σωστά', 14)">
+        🟢 95% - 100% σωστά — Απόλυτη σιγουριά (+14 ημέρες)
     </button>
 
     <div id="output" class="result">
@@ -130,7 +144,7 @@
 <script>
 const urlParams = new URLSearchParams(window.location.search);
 let currentTopic = urlParams.get('topic'); 
-let quizUrl = urlParams.get('quiz'); // Διαβάζει το link του κουίζ αν υπάρχει
+let quizUrl = urlParams.get('quiz');
 
 if (currentTopic) {
     document.getElementById('topicName').innerText = currentTopic;
@@ -140,25 +154,43 @@ if (currentTopic) {
 }
 
 function calculate(label, days) {
-    let today = new Date();
-    let nextDate = new Date();
-    nextDate.setDate(today.getDate() + days);
+    // Ημερομηνία έναρξης επανάληψης
+    let startDate = new Date();
+    startDate.setDate(startDate.getDate() + days);
+    
+    // Ημερομηνία Deadline (+2 ημέρες μετά την επανάληψη)
+    let deadlineDate = new Date(startDate);
+    deadlineDate.setDate(deadlineDate.getDate() + 2);
 
-    let formattedDate = nextDate.toISOString().replace(/-|:|\.\d\d\d/g, "").substring(0, 8);
-    let calendarTitle = `Επανάληψη: ${currentTopic}`;
-
-    // Λεπτομέρειες για το Google Calendar
-    let detailsText = `Επανάληψη βάσει αυτοπεποίθησης (${label}).`;
-    if (quizUrl) {
-        detailsText += `\n\n🔗 Link για το Κουίζ: ${quizUrl}`;
+    // Μορφοποίηση ημερομηνιών και ώρας (18:00 - 18:30) για το Google Calendar (Format: YYYYMMDDTHHMMSS)
+    function formatCalDate(d, hours, minutes) {
+        let year = d.getFullYear();
+        let month = String(d.getMonth() + 1).padStart(2, '0');
+        let day = String(d.getDate()).padStart(2, '0');
+        let h = String(hours).padStart(2, '0');
+        let m = String(minutes).padStart(2, '0');
+        return `${year}${month}${day}T${h}${m}00`;
     }
 
-    let calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(calendarTitle)}&details=${encodeURIComponent(detailsText)}&dates=${formattedDate}/${formattedDate}`;
+    // Ορίζουμε έναρξη επανάληψης στις 18:00 και λήξη/deadline στις 18:30
+    let startIso = formatCalDate(startDate, 18, 0);
+    let endIso = formatCalDate(startDate, 18, 30);
+
+    let calendarTitle = `📚 Επανάληψη: ${currentTopic}`;
+
+    // Λεπτομέρειες/Σημειώσεις
+    let detailsText = `🎯 Αποτέλεσμα: ${label}\n⏳ Προτεινόμενο Deadline: ${deadlineDate.toLocaleDateString('el-GR')}`;
+    if (quizUrl) {
+        detailsText += `\n\n🔗 Link Κουίζ: ${quizUrl}`;
+    }
+
+    let calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(calendarTitle)}&details=${encodeURIComponent(detailsText)}&dates=${startIso}/${endIso}`;
 
     document.getElementById('resultText').innerHTML = `
-        <strong style="color: #1e293b;">Κατηγορία: ${label}</strong><br><br>
-        <span style="color: #475569; font-size: 14px;">
-            Η επανάληψη για το μάθημα <strong>${currentTopic}</strong> προγραμματίστηκε για τις <strong>${nextDate.toLocaleDateString('el-GR')}</strong> (σε ${days} ημέρες).
+        <strong style="color: #1e293b; font-size: 16px;">Επιλογή: ${label}</strong><br><br>
+        <span style="color: #475569; font-size: 14px; line-height: 1.5; display: block;">
+            📅 <strong>Ημερομηνία Επανάληψης:</strong> ${startDate.toLocaleDateString('el-GR')}<br>
+            ⏳ <strong>Προτεινόμενο Deadline:</strong> ${deadlineDate.toLocaleDateString('el-GR')} (+2 ημέρες)
         </span>
     `;
     
