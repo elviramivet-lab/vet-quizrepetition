@@ -95,7 +95,6 @@
 <div class="card">
     <h2>🐾 Πώς πήγε το Κουίζ;</h2>
     
-    <!-- Εδώ θα εμφανίζεται αυτόματα το μάθημα -->
     <div id="topicBadge" class="topic-badge" style="display:none;">Μάθημα: <span id="topicName"></span></div>
 
     <p>Επίλεξε παρακάτω με βάση την αυτοπεποίθησή σου στο θέμα και το ποσοστό των απαντήσεων που εκτιμάς ότι απάντησες σωστά, για να υπολογίσουμε πότε θα κάνεις την επόμενη επανάληψη.</p>
@@ -129,16 +128,15 @@
 </div>
 
 <script>
-// 1. Διαβάζουμε αυτόματα αν υπάρχει όνομα μαθήματος στη διεύθυνση (URL)
 const urlParams = new URLSearchParams(window.location.search);
-let currentTopic = urlParams.get('topic'); // Ψάχνει για ?topic=ΟνομαΜαθήματος
+let currentTopic = urlParams.get('topic'); 
+let quizUrl = urlParams.get('quiz'); // Διαβάζει το link του κουίζ αν υπάρχει
 
 if (currentTopic) {
-    // Αν βρει μάθημα, το εμφανίζει στην οθόνη
     document.getElementById('topicName').innerText = currentTopic;
     document.getElementById('topicBadge').style.display = 'inline-block';
 } else {
-    currentTopic = "Κτηνιατρικό Κουίζ"; // Προεπιλεγμένο αν δεν δοθεί τίποτα
+    currentTopic = "Κτηνιατρικό Κουίζ";
 }
 
 function calculate(label, days) {
@@ -147,11 +145,15 @@ function calculate(label, days) {
     nextDate.setDate(today.getDate() + days);
 
     let formattedDate = nextDate.toISOString().replace(/-|:|\.\d\d\d/g, "").substring(0, 8);
-    
-    // Χρησιμοποιούμε το δυναμικό θέμα που διαβάσαμε από το link
     let calendarTitle = `Επανάληψη: ${currentTopic}`;
 
-    let calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(calendarTitle)}&details=Επανάληψη+βάσει+αυτοπεποίθησης+(${encodeURIComponent(label)})&dates=${formattedDate}/${formattedDate}`;
+    // Λεπτομέρειες για το Google Calendar
+    let detailsText = `Επανάληψη βάσει αυτοπεποίθησης (${label}).`;
+    if (quizUrl) {
+        detailsText += `\n\n🔗 Link για το Κουίζ: ${quizUrl}`;
+    }
+
+    let calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(calendarTitle)}&details=${encodeURIComponent(detailsText)}&dates=${formattedDate}/${formattedDate}`;
 
     document.getElementById('resultText').innerHTML = `
         <strong style="color: #1e293b;">Κατηγορία: ${label}</strong><br><br>
